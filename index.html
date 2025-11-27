@@ -2,13 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pineapple Auto Spa - Your Wash Status</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Pineapple Auto Spa - Live Status</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,307 +18,623 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- GSAP -->
+    <!-- GSAP with Plugins -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     
     <style>
         :root {
             --pineapple-yellow: #fec20f;
+            --pineapple-yellow-dark: #d4a00c;
             --dark-grey: #121212;
+            --dark-grey-light: #1a1a1a;
+            --success: #10b981;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: var(--dark-grey);
+            background: linear-gradient(135deg, #121212 0%, #0a0a0a 100%);
             color: #ffffff;
             overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
         }
         
         h1, h2, h3, h4, h5, h6 {
             font-family: 'Montserrat', sans-serif;
         }
         
-        /* Background Pattern */
-        .bg-pattern {
+        /* Animated Background */
+        .bg-animated {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            opacity: 0.03;
-            background-image: 
-                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(254, 194, 15, 0.1) 35px, rgba(254, 194, 15, 0.1) 70px),
-                repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(254, 194, 15, 0.1) 35px, rgba(254, 194, 15, 0.1) 70px);
-            pointer-events: none;
             z-index: 0;
+            overflow: hidden;
         }
         
-        /* Glassmorphism Effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        /* Pulse Animation for Active Stage */
-        @keyframes pulse-glow {
-            0%, 100% {
-                box-shadow: 0 0 20px rgba(254, 194, 15, 0.5),
-                            0 0 40px rgba(254, 194, 15, 0.3),
-                            0 0 60px rgba(254, 194, 15, 0.1);
-            }
-            50% {
-                box-shadow: 0 0 30px rgba(254, 194, 15, 0.8),
-                            0 0 60px rgba(254, 194, 15, 0.5),
-                            0 0 90px rgba(254, 194, 15, 0.2);
-            }
-        }
-        
-        .pulse-active {
-            animation: pulse-glow 2s ease-in-out infinite;
-        }
-        
-        /* Timeline Connector */
-        .timeline-connector {
+        .bg-gradient-orb {
             position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 3px;
-            background: linear-gradient(to bottom, 
-                rgba(254, 194, 15, 0.6) 0%,
-                rgba(254, 194, 15, 0.3) 50%,
-                rgba(255, 255, 255, 0.1) 100%);
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(254, 194, 15, 0.15) 0%, transparent 70%);
+            filter: blur(80px);
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        .bg-gradient-orb:nth-child(1) {
+            top: -300px;
+            left: -300px;
+            animation-delay: 0s;
+        }
+        
+        .bg-gradient-orb:nth-child(2) {
+            bottom: -300px;
+            right: -300px;
+            animation-delay: 10s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, 50px) scale(1.1); }
+            66% { transform: translate(-50px, -50px) scale(0.9); }
+        }
+        
+        /* Grid Pattern Overlay */
+        .grid-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(254, 194, 15, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(254, 194, 15, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
             z-index: 1;
+            pointer-events: none;
         }
         
-        /* Stage Card */
-        .stage-card {
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 1px solid rgba(254, 194, 15, 0.2);
+        }
+        
+        /* Circular Progress Ring */
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease;
+            stroke-linecap: round;
+        }
+        
+        /* Stage Indicator */
+        .stage-indicator {
             position: relative;
-            z-index: 2;
-            transition: all 0.3s ease;
-        }
-        
-        .stage-card.completed {
-            border-color: var(--pineapple-yellow);
-            background: rgba(254, 194, 15, 0.1);
-        }
-        
-        .stage-card.active {
-            border-color: var(--pineapple-yellow);
-            background: rgba(254, 194, 15, 0.15);
-        }
-        
-        /* Coffee Card Hover */
-        .coffee-card {
-            transition: all 0.3s ease;
-        }
-        
-        .coffee-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(254, 194, 15, 0.2);
-        }
-        
-        /* Order Button Animation */
-        .order-btn {
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
         
-        .order-btn.ordered {
-            background: #10b981;
-            width: auto;
-            padding-left: 1.5rem;
-            padding-right: 1.5rem;
+        .stage-indicator.completed {
+            transform: scale(1);
         }
         
-        /* Countdown Timer */
-        .countdown {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 700;
-            letter-spacing: 2px;
+        .stage-indicator.active {
+            animation: stagePulse 2s ease-in-out infinite;
+        }
+        
+        .stage-indicator.pending {
+            opacity: 0.4;
+        }
+        
+        @keyframes stagePulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(254, 194, 15, 0.7);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 15px rgba(254, 194, 15, 0);
+            }
+        }
+        
+        /* Stage Card 3D Effect */
+        .stage-card-3d {
+            transform-style: preserve-3d;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        
+        .stage-card-3d:hover {
+            transform: translateY(-5px) rotateX(2deg);
+        }
+        
+        /* Coffee Card */
+        .coffee-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+        }
+        
+        .coffee-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(254, 194, 15, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .coffee-card:hover::before {
+            left: 100%;
+        }
+        
+        .coffee-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(254, 194, 15, 0.4);
+            box-shadow: 0 20px 40px rgba(254, 194, 15, 0.15);
+        }
+        
+        .coffee-card.selected {
+            border-color: var(--pineapple-yellow);
+            background: rgba(254, 194, 15, 0.1);
+            box-shadow: 0 0 30px rgba(254, 194, 15, 0.3);
+        }
+        
+        /* Quantity Selector */
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .quantity-selector.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .qty-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--pineapple-yellow);
+            background: transparent;
+            color: var(--pineapple-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        
+        .qty-btn:hover {
+            background: var(--pineapple-yellow);
+            color: var(--dark-grey);
+            transform: scale(1.1);
+        }
+        
+        .qty-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Cart Badge */
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--pineapple-yellow);
+            color: var(--dark-grey);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            transform: scale(0);
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .cart-badge.active {
+            transform: scale(1);
+        }
+        
+        /* Order Button */
+        .order-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        
+        .order-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .order-btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .order-btn.success {
+            background: var(--success);
+        }
+        
+        /* Confetti Effect */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: var(--pineapple-yellow);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            opacity: 0;
+        }
+        
+        /* Shimmer Effect */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        .shimmer {
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(254, 194, 15, 0.4),
+                transparent
+            );
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
         }
         
         /* Mobile Optimizations */
         @media (max-width: 640px) {
-            .container {
-                padding-left: 1rem;
-                padding-right: 1rem;
+            .stage-card-3d:hover {
+                transform: none;
             }
+        }
+        
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.05) 25%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.05) 75%
+            );
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
     </style>
 </head>
 <body>
-    <div class="bg-pattern"></div>
+    <div class="bg-animated">
+        <div class="bg-gradient-orb"></div>
+        <div class="bg-gradient-orb"></div>
+    </div>
+    <div class="grid-pattern"></div>
     
     <!-- Main Container -->
     <div class="min-h-screen relative z-10 pb-8">
         <!-- Header -->
-        <header class="glass border-b border-yellow-500/20 py-4 px-4">
+        <header class="glass-strong border-b border-yellow-500/20 py-4 px-4 sticky top-0 z-50">
             <div class="max-w-md mx-auto flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <i class="fas fa-car-side text-yellow-400 text-2xl"></i>
-                    <h1 class="text-xl font-bold text-yellow-400">Pineapple Auto Spa</h1>
+                    <div class="relative">
+                        <i class="fas fa-car-side text-yellow-400 text-2xl"></i>
+                        <span class="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-yellow-400">Pineapple Auto Spa</h1>
+                        <p class="text-xs text-gray-400">Live Status</p>
+                    </div>
                 </div>
-                <div class="text-sm text-gray-400">
-                    <i class="far fa-clock mr-1"></i>
-                    Live
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <div class="text-sm text-gray-400 flex items-center gap-1">
+                            <span class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
+                            Live
+                        </div>
+                    </div>
+                    <div class="relative" id="cartIcon">
+                        <i class="fas fa-shopping-cart text-yellow-400 text-xl"></i>
+                        <span class="cart-badge" id="cartBadge">0</span>
+                    </div>
                 </div>
             </div>
         </header>
         
-        <!-- Hero Section: Live Wash Tracker -->
+        <!-- Hero Section: Circular Progress & Status -->
         <section class="max-w-md mx-auto px-4 pt-8">
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-yellow-400 mb-2">Your Wash in Progress</h2>
-                <p class="text-gray-400 text-sm">We're taking care of your vehicle</p>
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-yellow-400 mb-2">Your Wash in Progress</h2>
+                <p class="text-gray-400">We're taking care of your vehicle</p>
             </div>
             
-            <!-- Countdown Timer -->
-            <div class="glass rounded-2xl p-6 mb-8 text-center">
-                <p class="text-gray-400 text-sm mb-2">Estimated Time Remaining</p>
-                <div class="countdown text-4xl text-yellow-400" id="countdown">14:00</div>
+            <!-- Circular Progress Ring -->
+            <div class="glass-strong rounded-3xl p-8 mb-8 text-center relative overflow-hidden">
+                <div class="relative w-64 h-64 mx-auto mb-6">
+                    <svg class="progress-ring w-full h-full" viewBox="0 0 200 200">
+                        <circle
+                            class="progress-ring-circle"
+                            cx="100"
+                            cy="100"
+                            r="85"
+                            fill="none"
+                            stroke="rgba(255, 255, 255, 0.1)"
+                            stroke-width="8"
+                        />
+                        <circle
+                            class="progress-ring-circle"
+                            id="progressCircle"
+                            cx="100"
+                            cy="100"
+                            r="85"
+                            fill="none"
+                            stroke="url(#gradient)"
+                            stroke-width="8"
+                            stroke-dasharray="534"
+                            stroke-dashoffset="178"
+                        />
+                        <defs>
+                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#fec20f;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#d4a00c;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <div class="countdown text-5xl font-bold text-yellow-400 mb-2" id="countdown">14:00</div>
+                        <p class="text-gray-400 text-sm">Time Remaining</p>
+                    </div>
+                </div>
+                
+                <!-- Current Stage Display -->
+                <div class="mt-6">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-400/20 border border-yellow-400/30">
+                        <i class="fas fa-spray-can text-yellow-400"></i>
+                        <span class="text-yellow-400 font-semibold" id="currentStage">Detailing</span>
+                    </div>
+                </div>
             </div>
             
-            <!-- Vertical Timeline -->
-            <div class="relative">
-                <!-- Timeline Connector -->
-                <div class="timeline-connector" style="top: 0; bottom: 0; height: 100%;"></div>
+            <!-- Stage Indicators (Horizontal) -->
+            <div class="flex justify-between items-center mb-8 relative">
+                <div class="absolute top-1/2 left-0 right-0 h-1 bg-gray-800 -z-10">
+                    <div class="h-full bg-gradient-to-r from-yellow-400 via-yellow-400 to-gray-800 transition-all duration-1000" id="progressBar" style="width: 66.66%"></div>
+                </div>
                 
-                <!-- Stage 1: Check-In (Completed) -->
-                <div class="stage-card completed glass rounded-xl p-4 mb-6 relative">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-check text-dark-grey text-lg"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-yellow-400 mb-1">Check-In</h3>
-                            <p class="text-gray-400 text-sm">Vehicle received and inspected</p>
-                        </div>
-                        <div class="text-yellow-400">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
+                <!-- Check-In -->
+                <div class="stage-indicator completed flex flex-col items-center gap-2">
+                    <div class="w-16 h-16 rounded-full bg-yellow-400 flex items-center justify-center shadow-lg shadow-yellow-400/50">
+                        <i class="fas fa-check text-dark-grey text-xl"></i>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs font-semibold text-yellow-400">Check-In</p>
+                        <p class="text-xs text-gray-500">Complete</p>
                     </div>
                 </div>
                 
-                <!-- Stage 2: Soap & Scrub (Completed) -->
-                <div class="stage-card completed glass rounded-xl p-4 mb-6 relative">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-check text-dark-grey text-lg"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-yellow-400 mb-1">Soap & Scrub</h3>
-                            <p class="text-gray-400 text-sm">Deep cleaning in progress</p>
-                        </div>
-                        <div class="text-yellow-400">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
+                <!-- Soap & Scrub -->
+                <div class="stage-indicator completed flex flex-col items-center gap-2">
+                    <div class="w-16 h-16 rounded-full bg-yellow-400 flex items-center justify-center shadow-lg shadow-yellow-400/50">
+                        <i class="fas fa-soap text-dark-grey text-xl"></i>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs font-semibold text-yellow-400">Soap & Scrub</p>
+                        <p class="text-xs text-gray-500">Complete</p>
                     </div>
                 </div>
                 
-                <!-- Stage 3: Detailing (Active - Pulsing) -->
-                <div class="stage-card active glass rounded-xl p-4 mb-6 relative pulse-active">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-spray-can text-dark-grey text-lg"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-yellow-400 mb-1">Detailing</h3>
-                            <p class="text-gray-400 text-sm">Final touches and polish</p>
-                        </div>
-                        <div class="text-yellow-400 animate-pulse">
-                            <i class="fas fa-circle-notch fa-spin"></i>
-                        </div>
+                <!-- Detailing -->
+                <div class="stage-indicator active flex flex-col items-center gap-2">
+                    <div class="w-16 h-16 rounded-full bg-yellow-400 flex items-center justify-center shadow-lg shadow-yellow-400/50">
+                        <i class="fas fa-spray-can text-dark-grey text-xl"></i>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs font-semibold text-yellow-400">Detailing</p>
+                        <p class="text-xs text-gray-500">In Progress</p>
                     </div>
                 </div>
                 
-                <!-- Stage 4: Ready (Pending) -->
-                <div class="stage-card glass rounded-xl p-4 relative opacity-50">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
-                            <i class="fas fa-car text-gray-400 text-lg"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-gray-400 mb-1">Ready</h3>
-                            <p class="text-gray-500 text-sm">Your vehicle will be ready soon</p>
-                        </div>
-                        <div class="text-gray-500">
-                            <i class="far fa-circle"></i>
-                        </div>
+                <!-- Ready -->
+                <div class="stage-indicator pending flex flex-col items-center gap-2">
+                    <div class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center">
+                        <i class="fas fa-car text-gray-500 text-xl"></i>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs font-semibold text-gray-500">Ready</p>
+                        <p class="text-xs text-gray-600">Pending</p>
                     </div>
                 </div>
             </div>
         </section>
         
         <!-- Fein Coffee Section -->
-        <section class="max-w-md mx-auto px-4 pt-12">
+        <section class="max-w-md mx-auto px-4 pt-8" id="coffeeSection">
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-yellow-400 mb-2">
-                    <i class="fas fa-coffee mr-2"></i>
-                    Fuel Up While You Wait
-                </h2>
+                <div class="inline-flex items-center gap-2 mb-3">
+                    <i class="fas fa-coffee text-yellow-400 text-2xl"></i>
+                    <h2 class="text-3xl font-bold text-yellow-400">Fuel Up While You Wait</h2>
+                </div>
                 <p class="text-gray-400 text-sm">Order from Fein Coffee • Delivered to Lobby</p>
             </div>
             
-            <!-- Coffee Menu Grid -->
+            <!-- Coffee Menu -->
             <div class="space-y-4 mb-6">
                 <!-- Iced Spanish Latte -->
-                <div class="coffee-card glass rounded-xl p-4">
-                    <div class="flex items-center justify-between">
+                <div class="coffee-card glass-strong rounded-2xl p-5" data-item="latte" data-price="6.50">
+                    <div class="flex items-start justify-between gap-4">
                         <div class="flex-1">
-                            <h3 class="font-semibold text-white mb-1">Iced Spanish Latte</h3>
-                            <p class="text-gray-400 text-sm">Smooth espresso with condensed milk</p>
-                            <p class="text-yellow-400 font-bold mt-2">$6.50</p>
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="font-bold text-white text-lg">Iced Spanish Latte</h3>
+                                <span class="px-2 py-1 bg-yellow-400/20 text-yellow-400 text-xs rounded-full">Popular</span>
+                            </div>
+                            <p class="text-gray-400 text-sm mb-3">Smooth espresso with condensed milk & ice</p>
+                            <div class="flex items-center justify-between">
+                                <p class="text-yellow-400 font-bold text-xl">$6.50</p>
+                                <div class="quantity-selector" id="qty-latte">
+                                    <button class="qty-btn" onclick="updateQuantity('latte', -1)">
+                                        <i class="fas fa-minus text-xs"></i>
+                                    </button>
+                                    <span class="text-white font-bold w-8 text-center" id="qty-latte-value">0</span>
+                                    <button class="qty-btn" onclick="updateQuantity('latte', 1)">
+                                        <i class="fas fa-plus text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="ml-4">
-                            <i class="fas fa-coffee text-yellow-400 text-3xl"></i>
+                        <div class="flex-shrink-0">
+                            <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-yellow-400/20 to-yellow-400/5 flex items-center justify-center border border-yellow-400/20">
+                                <i class="fas fa-coffee text-yellow-400 text-3xl"></i>
+                            </div>
                         </div>
                     </div>
+                    <button class="add-to-cart-btn w-full mt-4 py-3 bg-yellow-400 text-dark-grey font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all hover:bg-yellow-300" onclick="addToCart('latte')">
+                        <i class="fas fa-plus"></i>
+                        <span>Add to Order</span>
+                    </button>
                 </div>
                 
                 <!-- Nitro Cold Brew -->
-                <div class="coffee-card glass rounded-xl p-4">
-                    <div class="flex items-center justify-between">
+                <div class="coffee-card glass-strong rounded-2xl p-5" data-item="coldbrew" data-price="5.50">
+                    <div class="flex items-start justify-between gap-4">
                         <div class="flex-1">
-                            <h3 class="font-semibold text-white mb-1">Nitro Cold Brew</h3>
-                            <p class="text-gray-400 text-sm">Creamy, smooth, and bold</p>
-                            <p class="text-yellow-400 font-bold mt-2">$5.50</p>
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="font-bold text-white text-lg">Nitro Cold Brew</h3>
+                            </div>
+                            <p class="text-gray-400 text-sm mb-3">Creamy, smooth, and bold with nitrogen infusion</p>
+                            <div class="flex items-center justify-between">
+                                <p class="text-yellow-400 font-bold text-xl">$5.50</p>
+                                <div class="quantity-selector" id="qty-coldbrew">
+                                    <button class="qty-btn" onclick="updateQuantity('coldbrew', -1)">
+                                        <i class="fas fa-minus text-xs"></i>
+                                    </button>
+                                    <span class="text-white font-bold w-8 text-center" id="qty-coldbrew-value">0</span>
+                                    <button class="qty-btn" onclick="updateQuantity('coldbrew', 1)">
+                                        <i class="fas fa-plus text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="ml-4">
-                            <i class="fas fa-mug-hot text-yellow-400 text-3xl"></i>
+                        <div class="flex-shrink-0">
+                            <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-yellow-400/20 to-yellow-400/5 flex items-center justify-center border border-yellow-400/20">
+                                <i class="fas fa-mug-hot text-yellow-400 text-3xl"></i>
+                            </div>
                         </div>
                     </div>
+                    <button class="add-to-cart-btn w-full mt-4 py-3 bg-yellow-400 text-dark-grey font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all hover:bg-yellow-300" onclick="addToCart('coldbrew')">
+                        <i class="fas fa-plus"></i>
+                        <span>Add to Order</span>
+                    </button>
                 </div>
                 
                 <!-- Matcha Tonic -->
-                <div class="coffee-card glass rounded-xl p-4">
-                    <div class="flex items-center justify-between">
+                <div class="coffee-card glass-strong rounded-2xl p-5" data-item="matcha" data-price="6.00">
+                    <div class="flex items-start justify-between gap-4">
                         <div class="flex-1">
-                            <h3 class="font-semibold text-white mb-1">Matcha Tonic</h3>
-                            <p class="text-gray-400 text-sm">Refreshing green tea with tonic</p>
-                            <p class="text-yellow-400 font-bold mt-2">$6.00</p>
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="font-bold text-white text-lg">Matcha Tonic</h3>
+                                <span class="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">Refreshing</span>
+                            </div>
+                            <p class="text-gray-400 text-sm mb-3">Refreshing green tea with tonic water</p>
+                            <div class="flex items-center justify-between">
+                                <p class="text-yellow-400 font-bold text-xl">$6.00</p>
+                                <div class="quantity-selector" id="qty-matcha">
+                                    <button class="qty-btn" onclick="updateQuantity('matcha', -1)">
+                                        <i class="fas fa-minus text-xs"></i>
+                                    </button>
+                                    <span class="text-white font-bold w-8 text-center" id="qty-matcha-value">0</span>
+                                    <button class="qty-btn" onclick="updateQuantity('matcha', 1)">
+                                        <i class="fas fa-plus text-xs"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="ml-4">
-                            <i class="fas fa-leaf text-yellow-400 text-3xl"></i>
+                        <div class="flex-shrink-0">
+                            <div class="w-20 h-20 rounded-xl bg-gradient-to-br from-yellow-400/20 to-yellow-400/5 flex items-center justify-center border border-yellow-400/20">
+                                <i class="fas fa-leaf text-yellow-400 text-3xl"></i>
+                            </div>
                         </div>
                     </div>
+                    <button class="add-to-cart-btn w-full mt-4 py-3 bg-yellow-400 text-dark-grey font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-all hover:bg-yellow-300" onclick="addToCart('matcha')">
+                        <i class="fas fa-plus"></i>
+                        <span>Add to Order</span>
+                    </button>
                 </div>
             </div>
             
-            <!-- Order Button -->
-            <button id="orderBtn" class="order-btn w-full bg-yellow-400 text-dark-grey font-bold py-4 rounded-xl text-lg flex items-center justify-center gap-2 hover:bg-yellow-300 transition-colors">
+            <!-- Cart Summary & Order Button -->
+            <div class="glass-strong rounded-2xl p-6 mb-6" id="cartSummary" style="display: none;">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-white text-lg">Order Summary</h3>
+                    <button onclick="clearCart()" class="text-gray-400 hover:text-white text-sm">
+                        <i class="fas fa-trash mr-1"></i>Clear
+                    </button>
+                </div>
+                <div id="cartItems" class="space-y-2 mb-4"></div>
+                <div class="flex items-center justify-between pt-4 border-t border-white/10">
+                    <span class="text-gray-400 font-semibold">Total</span>
+                    <span class="text-yellow-400 font-bold text-2xl" id="cartTotal">$0.00</span>
+                </div>
+            </div>
+            
+            <button id="orderBtn" class="order-btn w-full bg-yellow-400 text-dark-grey font-bold py-5 rounded-2xl text-lg flex items-center justify-center gap-2 shadow-lg shadow-yellow-400/30 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
                 <i class="fas fa-bell"></i>
-                <span>Order to Lobby</span>
+                <span id="orderBtnText">Add Items to Order</span>
             </button>
         </section>
         
         <!-- Footer -->
-        <footer class="max-w-md mx-auto px-4 pt-8 text-center">
+        <footer class="max-w-md mx-auto px-4 pt-8 pb-8 text-center">
             <p class="text-gray-500 text-xs">
                 <i class="fas fa-map-marker-alt mr-1"></i>
                 Visit us at Pineapple Auto Spa
@@ -325,45 +643,34 @@
     </div>
     
     <script>
-        // GSAP Animations on Load
-        gsap.registerPlugin();
+        // Register GSAP Plugins
+        gsap.registerPlugin(ScrollTrigger);
         
-        // Animate elements on page load
-        gsap.from("header", {
-            y: -50,
-            opacity: 0,
-            duration: 0.6,
-            ease: "power2.out"
-        });
+        // State Management
+        const cart = {
+            latte: 0,
+            coldbrew: 0,
+            matcha: 0
+        };
         
-        gsap.from(".stage-card", {
-            x: -30,
-            opacity: 0,
-            duration: 0.6,
-            stagger: 0.2,
-            delay: 0.3,
-            ease: "power2.out"
-        });
+        const prices = {
+            latte: 6.50,
+            coldbrew: 5.50,
+            matcha: 6.00
+        };
         
-        gsap.from(".coffee-card", {
-            y: 30,
-            opacity: 0,
-            duration: 0.6,
-            stagger: 0.15,
-            delay: 0.8,
-            ease: "power2.out"
-        });
-        
-        gsap.from("#orderBtn", {
-            scale: 0.8,
-            opacity: 0,
-            duration: 0.5,
-            delay: 1.2,
-            ease: "back.out(1.7)"
-        });
+        const itemNames = {
+            latte: 'Iced Spanish Latte',
+            coldbrew: 'Nitro Cold Brew',
+            matcha: 'Matcha Tonic'
+        };
         
         // Countdown Timer
         let timeLeft = 14 * 60; // 14 minutes in seconds
+        const totalTime = 14 * 60;
+        const progressCircle = document.getElementById('progressCircle');
+        const circumference = 2 * Math.PI * 85;
+        progressCircle.style.strokeDasharray = circumference;
         
         function updateCountdown() {
             const minutes = Math.floor(timeLeft / 60);
@@ -371,34 +678,159 @@
             const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             document.getElementById('countdown').textContent = formattedTime;
             
+            // Update progress ring
+            const progress = ((totalTime - timeLeft) / totalTime) * 100;
+            const offset = circumference - (progress / 100) * circumference;
+            progressCircle.style.strokeDashoffset = offset;
+            
+            // Update progress bar
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${progress}%`;
+            
             if (timeLeft > 0) {
                 timeLeft--;
             } else {
-                // When timer reaches 0, update to "Ready" stage
-                const readyStage = document.querySelector('.stage-card:last-child');
-                readyStage.classList.remove('opacity-50');
-                readyStage.classList.add('active', 'pulse-active');
-                readyStage.querySelector('.w-12').classList.remove('bg-gray-600');
-                readyStage.querySelector('.w-12').classList.add('bg-yellow-400');
-                readyStage.querySelector('i.fa-car').classList.remove('text-gray-400');
-                readyStage.querySelector('i.fa-car').classList.add('text-dark-grey');
-                readyStage.querySelector('h3').classList.remove('text-gray-400');
-                readyStage.querySelector('h3').classList.add('text-yellow-400');
-                readyStage.querySelector('i.far').classList.remove('fa-circle', 'text-gray-500');
-                readyStage.querySelector('i.far').outerHTML = '<i class="fas fa-check-circle text-yellow-400"></i>';
+                // Complete the wash
+                completeWash();
             }
+        }
+        
+        function completeWash() {
+            const readyStage = document.querySelector('.stage-indicator.pending');
+            readyStage.classList.remove('pending');
+            readyStage.classList.add('active');
+            readyStage.querySelector('.w-16').classList.remove('bg-gray-700');
+            readyStage.querySelector('.w-16').classList.add('bg-yellow-400');
+            readyStage.querySelector('i.fa-car').classList.remove('text-gray-500');
+            readyStage.querySelector('i.fa-car').classList.add('text-dark-grey');
+            readyStage.querySelector('p.text-gray-500').textContent = 'Complete';
+            readyStage.querySelector('p.text-gray-500').classList.remove('text-gray-500');
+            readyStage.querySelector('p.text-gray-500').classList.add('text-yellow-400');
+            
+            document.getElementById('currentStage').textContent = 'Ready for Pickup';
+            document.getElementById('progressBar').style.width = '100%';
+            
+            // Animate completion
+            gsap.to(readyStage, {
+                scale: 1.2,
+                duration: 0.3,
+                yoyo: true,
+                repeat: 1,
+                ease: "power2.out"
+            });
         }
         
         setInterval(updateCountdown, 1000);
         
-        // Order Button Animation
+        // Cart Functions
+        function updateQuantity(item, change) {
+            cart[item] = Math.max(0, cart[item] + change);
+            document.getElementById(`qty-${item}-value`).textContent = cart[item];
+            
+            const selector = document.getElementById(`qty-${item}`);
+            if (cart[item] > 0) {
+                selector.classList.add('visible');
+            } else {
+                selector.classList.remove('visible');
+            }
+            
+            updateCart();
+        }
+        
+        function addToCart(item) {
+            cart[item]++;
+            document.getElementById(`qty-${item}-value`).textContent = cart[item];
+            const selector = document.getElementById(`qty-${item}`);
+            selector.classList.add('visible');
+            
+            // Animate card
+            const card = document.querySelector(`[data-item="${item}"]`);
+            gsap.to(card, {
+                scale: 1.05,
+                duration: 0.2,
+                yoyo: true,
+                repeat: 1,
+                ease: "power2.inOut"
+            });
+            
+            updateCart();
+        }
+        
+        function updateCart() {
+            const totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+            const cartBadge = document.getElementById('cartBadge');
+            const cartSummary = document.getElementById('cartSummary');
+            const orderBtn = document.getElementById('orderBtn');
+            
+            // Update badge
+            if (totalItems > 0) {
+                cartBadge.textContent = totalItems;
+                cartBadge.classList.add('active');
+                gsap.to(cartBadge, {
+                    scale: 1.2,
+                    duration: 0.2,
+                    yoyo: true,
+                    repeat: 1,
+                    ease: "power2.inOut"
+                });
+            } else {
+                cartBadge.classList.remove('active');
+            }
+            
+            // Update cart summary
+            if (totalItems > 0) {
+                cartSummary.style.display = 'block';
+                gsap.from(cartSummary, {
+                    opacity: 0,
+                    y: 20,
+                    duration: 0.3
+                });
+                
+                let html = '';
+                let total = 0;
+                
+                for (const [item, qty] of Object.entries(cart)) {
+                    if (qty > 0) {
+                        const price = prices[item] * qty;
+                        total += price;
+                        html += `
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-300">${itemNames[item]} x${qty}</span>
+                                <span class="text-yellow-400 font-semibold">$${price.toFixed(2)}</span>
+                            </div>
+                        `;
+                    }
+                }
+                
+                document.getElementById('cartItems').innerHTML = html;
+                document.getElementById('cartTotal').textContent = `$${total.toFixed(2)}`;
+                
+                orderBtn.disabled = false;
+                document.getElementById('orderBtnText').textContent = `Order to Lobby ($${total.toFixed(2)})`;
+            } else {
+                cartSummary.style.display = 'none';
+                orderBtn.disabled = true;
+                document.getElementById('orderBtnText').textContent = 'Add Items to Order';
+            }
+        }
+        
+        function clearCart() {
+            for (const item in cart) {
+                cart[item] = 0;
+                document.getElementById(`qty-${item}-value`).textContent = '0';
+                document.getElementById(`qty-${item}`).classList.remove('visible');
+            }
+            updateCart();
+        }
+        
+        // Order Button
         const orderBtn = document.getElementById('orderBtn');
         let isOrdered = false;
         
         orderBtn.addEventListener('click', function() {
-            if (!isOrdered) {
+            if (!isOrdered && !this.disabled) {
                 isOrdered = true;
-                const btnText = this.querySelector('span');
+                const btnText = document.getElementById('orderBtnText');
                 const btnIcon = this.querySelector('i');
                 
                 // Animate button
@@ -411,28 +843,119 @@
                     onComplete: () => {
                         btnIcon.className = 'fas fa-check';
                         btnText.textContent = 'Barista Notified!';
-                        this.classList.add('ordered');
+                        this.classList.add('success');
+                        this.disabled = true;
                         
-                        // Add success animation
+                        // Confetti effect
+                        createConfetti();
+                        
+                        // Success animation
                         gsap.from(this, {
                             scale: 1.1,
                             duration: 0.3,
                             ease: "back.out(1.7)"
                         });
+                        
+                        // Reset after 3 seconds
+                        setTimeout(() => {
+                            isOrdered = false;
+                            clearCart();
+                            btnIcon.className = 'fas fa-bell';
+                            btnText.textContent = 'Add Items to Order';
+                            this.classList.remove('success');
+                            this.disabled = true;
+                        }, 3000);
                     }
                 });
             }
         });
         
-        // Add subtle parallax effect on scroll
+        function createConfetti() {
+            for (let i = 0; i < 20; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${50 + (Math.random() - 0.5) * 20}%`;
+                confetti.style.top = '50%';
+                confetti.style.background = ['#fec20f', '#d4a00c', '#10b981'][Math.floor(Math.random() * 3)];
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                document.body.appendChild(confetti);
+                
+                gsap.to(confetti, {
+                    x: (Math.random() - 0.5) * 400,
+                    y: (Math.random() - 0.5) * 400,
+                    opacity: 1,
+                    scale: Math.random() * 0.5 + 0.5,
+                    duration: 1,
+                    ease: "power2.out",
+                    onComplete: () => confetti.remove()
+                });
+            }
+        }
+        
+        // GSAP Animations on Load
+        gsap.from("header", {
+            y: -50,
+            opacity: 0,
+            duration: 0.8,
+            ease: "power3.out"
+        });
+        
+        gsap.from(".progress-ring", {
+            scale: 0,
+            rotation: -180,
+            duration: 1,
+            delay: 0.3,
+            ease: "back.out(1.7)"
+        });
+        
+        gsap.from(".stage-indicator", {
+            y: 30,
+            opacity: 0,
+            duration: 0.6,
+            stagger: 0.15,
+            delay: 0.6,
+            ease: "power2.out"
+        });
+        
+        ScrollTrigger.create({
+            trigger: "#coffeeSection",
+            start: "top 80%",
+            animation: gsap.from(".coffee-card", {
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                stagger: 0.1,
+                ease: "power3.out"
+            })
+        });
+        
+        // Parallax effect
+        let lastScroll = 0;
         window.addEventListener('scroll', () => {
             const scrolled = window.pageYOffset;
-            const pattern = document.querySelector('.bg-pattern');
-            if (pattern) {
-                pattern.style.transform = `translateY(${scrolled * 0.5}px)`;
-            }
+            const orbs = document.querySelectorAll('.bg-gradient-orb');
+            orbs.forEach((orb, index) => {
+                const speed = (index + 1) * 0.3;
+                gsap.to(orb, {
+                    y: scrolled * speed,
+                    duration: 0.5,
+                    ease: "power1.out"
+                });
+            });
+            lastScroll = scrolled;
+        });
+        
+        // Haptic-like feedback on interactions
+        document.querySelectorAll('button, .coffee-card').forEach(el => {
+            el.addEventListener('touchstart', function() {
+                gsap.to(this, {
+                    scale: 0.95,
+                    duration: 0.1,
+                    yoyo: true,
+                    repeat: 1
+                });
+            });
         });
     </script>
 </body>
 </html>
-
