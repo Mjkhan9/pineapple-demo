@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pineapple Auto Spa - Your Wash Status</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <style>
+        :root {
+            --pineapple-yellow: #fec20f;
+            --dark-grey: #121212;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark-grey);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        /* Background Pattern */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            background-image: 
+                repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(254, 194, 15, 0.1) 35px, rgba(254, 194, 15, 0.1) 70px),
+                repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(254, 194, 15, 0.1) 35px, rgba(254, 194, 15, 0.1) 70px);
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* Glassmorphism Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Pulse Animation for Active Stage */
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(254, 194, 15, 0.5),
+                            0 0 40px rgba(254, 194, 15, 0.3),
+                            0 0 60px rgba(254, 194, 15, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(254, 194, 15, 0.8),
+                            0 0 60px rgba(254, 194, 15, 0.5),
+                            0 0 90px rgba(254, 194, 15, 0.2);
+            }
+        }
+        
+        .pulse-active {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        /* Timeline Connector */
+        .timeline-connector {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            background: linear-gradient(to bottom, 
+                rgba(254, 194, 15, 0.6) 0%,
+                rgba(254, 194, 15, 0.3) 50%,
+                rgba(255, 255, 255, 0.1) 100%);
+            z-index: 1;
+        }
+        
+        /* Stage Card */
+        .stage-card {
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+        
+        .stage-card.completed {
+            border-color: var(--pineapple-yellow);
+            background: rgba(254, 194, 15, 0.1);
+        }
+        
+        .stage-card.active {
+            border-color: var(--pineapple-yellow);
+            background: rgba(254, 194, 15, 0.15);
+        }
+        
+        /* Coffee Card Hover */
+        .coffee-card {
+            transition: all 0.3s ease;
+        }
+        
+        .coffee-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(254, 194, 15, 0.2);
+        }
+        
+        /* Order Button Animation */
+        .order-btn {
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .order-btn.ordered {
+            background: #10b981;
+            width: auto;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+        
+        /* Countdown Timer */
+        .countdown {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 640px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <!-- Main Container -->
+    <div class="min-h-screen relative z-10 pb-8">
+        <!-- Header -->
+        <header class="glass border-b border-yellow-500/20 py-4 px-4">
+            <div class="max-w-md mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-car-side text-yellow-400 text-2xl"></i>
+                    <h1 class="text-xl font-bold text-yellow-400">Pineapple Auto Spa</h1>
+                </div>
+                <div class="text-sm text-gray-400">
+                    <i class="far fa-clock mr-1"></i>
+                    Live
+                </div>
+            </div>
+        </header>
+        
+        <!-- Hero Section: Live Wash Tracker -->
+        <section class="max-w-md mx-auto px-4 pt-8">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-yellow-400 mb-2">Your Wash in Progress</h2>
+                <p class="text-gray-400 text-sm">We're taking care of your vehicle</p>
+            </div>
+            
+            <!-- Countdown Timer -->
+            <div class="glass rounded-2xl p-6 mb-8 text-center">
+                <p class="text-gray-400 text-sm mb-2">Estimated Time Remaining</p>
+                <div class="countdown text-4xl text-yellow-400" id="countdown">14:00</div>
+            </div>
+            
+            <!-- Vertical Timeline -->
+            <div class="relative">
+                <!-- Timeline Connector -->
+                <div class="timeline-connector" style="top: 0; bottom: 0; height: 100%;"></div>
+                
+                <!-- Stage 1: Check-In (Completed) -->
+                <div class="stage-card completed glass rounded-xl p-4 mb-6 relative">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-check text-dark-grey text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-yellow-400 mb-1">Check-In</h3>
+                            <p class="text-gray-400 text-sm">Vehicle received and inspected</p>
+                        </div>
+                        <div class="text-yellow-400">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stage 2: Soap & Scrub (Completed) -->
+                <div class="stage-card completed glass rounded-xl p-4 mb-6 relative">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-check text-dark-grey text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-yellow-400 mb-1">Soap & Scrub</h3>
+                            <p class="text-gray-400 text-sm">Deep cleaning in progress</p>
+                        </div>
+                        <div class="text-yellow-400">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stage 3: Detailing (Active - Pulsing) -->
+                <div class="stage-card active glass rounded-xl p-4 mb-6 relative pulse-active">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-spray-can text-dark-grey text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-yellow-400 mb-1">Detailing</h3>
+                            <p class="text-gray-400 text-sm">Final touches and polish</p>
+                        </div>
+                        <div class="text-yellow-400 animate-pulse">
+                            <i class="fas fa-circle-notch fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stage 4: Ready (Pending) -->
+                <div class="stage-card glass rounded-xl p-4 relative opacity-50">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-car text-gray-400 text-lg"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-gray-400 mb-1">Ready</h3>
+                            <p class="text-gray-500 text-sm">Your vehicle will be ready soon</p>
+                        </div>
+                        <div class="text-gray-500">
+                            <i class="far fa-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Fein Coffee Section -->
+        <section class="max-w-md mx-auto px-4 pt-12">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-yellow-400 mb-2">
+                    <i class="fas fa-coffee mr-2"></i>
+                    Fuel Up While You Wait
+                </h2>
+                <p class="text-gray-400 text-sm">Order from Fein Coffee • Delivered to Lobby</p>
+            </div>
+            
+            <!-- Coffee Menu Grid -->
+            <div class="space-y-4 mb-6">
+                <!-- Iced Spanish Latte -->
+                <div class="coffee-card glass rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white mb-1">Iced Spanish Latte</h3>
+                            <p class="text-gray-400 text-sm">Smooth espresso with condensed milk</p>
+                            <p class="text-yellow-400 font-bold mt-2">$6.50</p>
+                        </div>
+                        <div class="ml-4">
+                            <i class="fas fa-coffee text-yellow-400 text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Nitro Cold Brew -->
+                <div class="coffee-card glass rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white mb-1">Nitro Cold Brew</h3>
+                            <p class="text-gray-400 text-sm">Creamy, smooth, and bold</p>
+                            <p class="text-yellow-400 font-bold mt-2">$5.50</p>
+                        </div>
+                        <div class="ml-4">
+                            <i class="fas fa-mug-hot text-yellow-400 text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Matcha Tonic -->
+                <div class="coffee-card glass rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-white mb-1">Matcha Tonic</h3>
+                            <p class="text-gray-400 text-sm">Refreshing green tea with tonic</p>
+                            <p class="text-yellow-400 font-bold mt-2">$6.00</p>
+                        </div>
+                        <div class="ml-4">
+                            <i class="fas fa-leaf text-yellow-400 text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Button -->
+            <button id="orderBtn" class="order-btn w-full bg-yellow-400 text-dark-grey font-bold py-4 rounded-xl text-lg flex items-center justify-center gap-2 hover:bg-yellow-300 transition-colors">
+                <i class="fas fa-bell"></i>
+                <span>Order to Lobby</span>
+            </button>
+        </section>
+        
+        <!-- Footer -->
+        <footer class="max-w-md mx-auto px-4 pt-8 text-center">
+            <p class="text-gray-500 text-xs">
+                <i class="fas fa-map-marker-alt mr-1"></i>
+                Visit us at Pineapple Auto Spa
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        // GSAP Animations on Load
+        gsap.registerPlugin();
+        
+        // Animate elements on page load
+        gsap.from("header", {
+            y: -50,
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.out"
+        });
+        
+        gsap.from(".stage-card", {
+            x: -30,
+            opacity: 0,
+            duration: 0.6,
+            stagger: 0.2,
+            delay: 0.3,
+            ease: "power2.out"
+        });
+        
+        gsap.from(".coffee-card", {
+            y: 30,
+            opacity: 0,
+            duration: 0.6,
+            stagger: 0.15,
+            delay: 0.8,
+            ease: "power2.out"
+        });
+        
+        gsap.from("#orderBtn", {
+            scale: 0.8,
+            opacity: 0,
+            duration: 0.5,
+            delay: 1.2,
+            ease: "back.out(1.7)"
+        });
+        
+        // Countdown Timer
+        let timeLeft = 14 * 60; // 14 minutes in seconds
+        
+        function updateCountdown() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('countdown').textContent = formattedTime;
+            
+            if (timeLeft > 0) {
+                timeLeft--;
+            } else {
+                // When timer reaches 0, update to "Ready" stage
+                const readyStage = document.querySelector('.stage-card:last-child');
+                readyStage.classList.remove('opacity-50');
+                readyStage.classList.add('active', 'pulse-active');
+                readyStage.querySelector('.w-12').classList.remove('bg-gray-600');
+                readyStage.querySelector('.w-12').classList.add('bg-yellow-400');
+                readyStage.querySelector('i.fa-car').classList.remove('text-gray-400');
+                readyStage.querySelector('i.fa-car').classList.add('text-dark-grey');
+                readyStage.querySelector('h3').classList.remove('text-gray-400');
+                readyStage.querySelector('h3').classList.add('text-yellow-400');
+                readyStage.querySelector('i.far').classList.remove('fa-circle', 'text-gray-500');
+                readyStage.querySelector('i.far').outerHTML = '<i class="fas fa-check-circle text-yellow-400"></i>';
+            }
+        }
+        
+        setInterval(updateCountdown, 1000);
+        
+        // Order Button Animation
+        const orderBtn = document.getElementById('orderBtn');
+        let isOrdered = false;
+        
+        orderBtn.addEventListener('click', function() {
+            if (!isOrdered) {
+                isOrdered = true;
+                const btnText = this.querySelector('span');
+                const btnIcon = this.querySelector('i');
+                
+                // Animate button
+                gsap.to(this, {
+                    scale: 0.95,
+                    duration: 0.2,
+                    yoyo: true,
+                    repeat: 1,
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        btnIcon.className = 'fas fa-check';
+                        btnText.textContent = 'Barista Notified!';
+                        this.classList.add('ordered');
+                        
+                        // Add success animation
+                        gsap.from(this, {
+                            scale: 1.1,
+                            duration: 0.3,
+                            ease: "back.out(1.7)"
+                        });
+                    }
+                });
+            }
+        });
+        
+        // Add subtle parallax effect on scroll
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const pattern = document.querySelector('.bg-pattern');
+            if (pattern) {
+                pattern.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
+        });
+    </script>
+</body>
+</html>
+
